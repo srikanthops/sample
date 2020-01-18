@@ -1,5 +1,47 @@
-version: 2
+version: 2.1
+
+commands:
+  setup_sbt:
+    description: "Set up SBT"
+    parameters:
+      version:
+        type: string
+        default: "1.3.3"
+    steps:
+      - run:
+          name: Install SBT
+          command: |
+            curl -L -o sbt-<< parameters.version >>.deb https://dl.bintray.com/sbt/debian/sbt-<< parameters.version >>.deb
+            sudo dpkg -i sbt-<< parameters.version >>.deb
+            rm sbt-<< parameters.version >>.deb
+      - restore_cache:
+          key: sbt-cache-2
+
+  save_sbt_cache:
+    description: "Save SBT cache"
+    steps:
+      - save_cache:
+          key: sbt-cache-2
+          paths:
+            - "~/.ivy2/cache"
+            - "~/.sbt"
+            - "~/.m2"
+            - "~/.coursier"
+
 jobs:
+  sbt_tests:
+    docker:
+      - image: circleci/openjdk:8
+    steps:
+      - checkout
+      - setup_sbt
+      - run:
+          name: test sbt
+          command: |
+            date
+            echo "Hello World"
+      - save_sbt_cache
+
   one:
     docker:
       - image: circleci/ruby:2.4.1
@@ -14,9 +56,10 @@ jobs:
       - checkout
       - run: echo "A more familiar hi"
       - run: sleep 15
+
 workflows:
   version: 2
   one_and_two:
     jobs:
-      - one
-      - two
+      - sbt_tests
+
