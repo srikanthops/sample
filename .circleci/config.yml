@@ -14,14 +14,12 @@ commands:
             curl -L -o sbt-<< parameters.version >>.deb https://dl.bintray.com/sbt/debian/sbt-<< parameters.version >>.deb
             sudo dpkg -i sbt-<< parameters.version >>.deb
             rm sbt-<< parameters.version >>.deb
-      - restore_cache:
-          key: sbt-cache-2
 
   save_sbt_cache:
     description: "Save SBT cache"
     steps:
       - save_cache:
-          key: sbt-cache-2
+          key: sbt-cache
           paths:
             - "~/.ivy2/cache"
             - "~/.sbt"
@@ -41,25 +39,33 @@ jobs:
             date
             echo "Hello World"
       - save_sbt_cache
-
-  one:
+  sbt_tests2:
     docker:
-      - image: circleci/ruby:2.4.1
+      - image: circleci/openjdk:8
     steps:
       - checkout
-      - run: echo "A first hello"
-      - run: sleep 25
-  two:
-    docker:
-      - image: circleci/ruby:2.4.1
-    steps:
-      - checkout
-      - run: echo "A more familiar hi"
-      - run: sleep 15
+      - run:
+          name: PWD
+          command: |
+            pwd
+            ls
+            id
+            df .
+      - restore_cache:
+          keys:
+            - sbt-cache
+      - run:
+          name: PostRestoreCheck
+          command: |
+            pwd
+            ls ~/.ivy2
 
 workflows:
   version: 2
   one_and_two:
     jobs:
       - sbt_tests
+      - sbt_tests2:
+          requires:
+            - sbt_tests
 
