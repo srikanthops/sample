@@ -19,11 +19,11 @@ commands:
     description: "Save SBT cache"
     steps:
       - save_cache:
-          key: sbt-cache-{{ sha256sum .circleci/config.yml }}
+          key: sbt-cache-{{ sha256sum .circleci/config.yml | awk '{print $1}' }}
           paths:
             - "~/.ivy2/cache"
             - "~/.sbt"
-            - "~/.m2"
+            - "~/.m
             - "~/.coursier"
 
 jobs:
@@ -38,6 +38,7 @@ jobs:
           command: |
             date
             echo "Hello World"
+            which sha256sum
       - save_sbt_cache
   sbt_tests2:
     docker:
@@ -53,7 +54,7 @@ jobs:
             df .
       - restore_cache:
           keys:
-            - sbt-cache-{{ sha256sum .circleci/config.yml }}
+            - sbt-cache-{{ sha256sum .circleci/config.yml | awk '{print $1}' }}
       - run:
           name: PostRestoreCheck
           command: |
