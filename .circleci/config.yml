@@ -19,7 +19,7 @@ commands:
     description: "Save SBT cache"
     steps:
       - save_cache:
-          key: sbt-cache-{{ sha256sum .circleci/config.yml | awk '{print $1}' }}
+          key: sbt-cache-23
           paths:
             - "~/.ivy2/cache"
             - "~/.sbt"
@@ -54,7 +54,7 @@ jobs:
             df .
       - restore_cache:
           keys:
-            - sbt-cache-{{ sha256sum .circleci/config.yml | awk '{print $1}' }}
+            - sbt-cache-23
       - run:
           name: PostRestoreCheck
           command: |
